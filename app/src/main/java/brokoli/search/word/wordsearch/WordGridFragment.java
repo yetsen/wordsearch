@@ -5,12 +5,10 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -23,8 +21,12 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.github.mrengineer13.snackbar.SnackBar;
+
 import java.util.ArrayList;
 import java.util.Random;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 
 /**
@@ -130,7 +132,6 @@ public class WordGridFragment extends Fragment implements ViewTreeObserver.OnGlo
             int start = Integer.parseInt(foundWordsStartingPositions[i]);
             int end = Integer.parseInt(foundWordsEndingPositions[i]);
             direction = Integer.parseInt(foundWordsDirections[i]);
-            Log.e("deneme", start + " " + end + " " + direction);
             generateNewColor();
             drawRectangle(start, end, 0);
             drawRectangle(start, end, 1);
@@ -229,7 +230,6 @@ public class WordGridFragment extends Fragment implements ViewTreeObserver.OnGlo
     private boolean isUniqueString(String[] placedWords, String word, int howManyPlaced) {
         for(int i = 0; i < howManyPlaced; i++) {
             if(word.equals(placedWords[i])) {
-                Log.e("same word is placed : ", word + " " + placedWords[i]);
                 return false;
             }
         }
@@ -675,7 +675,11 @@ public class WordGridFragment extends Fragment implements ViewTreeObserver.OnGlo
                 drawRectangle(position1, wantedPosition, 0);
                 for(int i = 0; i < howManyPlaced; i++) {
                     if(placedWords[i].equals(word)) {
-                        Toast.makeText(getActivity().getBaseContext(), "buldun", Toast.LENGTH_SHORT).show();
+                        Short duration = 1000;
+                        new SnackBar.Builder(getActivity().getApplicationContext(), view)
+                                .withMessageId(R.string.found_toast)
+                                .withDuration(duration)
+                                .show();
                         foundWords[howManyFound] = placedWords[i];
                         foundWordsStartingPositions[howManyFound] = "" + position1;
                         foundWordsEndingPositions[howManyFound] = "" + wantedPosition;
@@ -685,6 +689,28 @@ public class WordGridFragment extends Fragment implements ViewTreeObserver.OnGlo
                         ((MainActivity) getActivity()).updateNavigationDrawer(placedWords, howManyPlaced);
                         drawRectangle(position1, wantedPosition, 1);
                         generateNewColor();
+                        if(howManyFound == howManyPlaced) {
+                            new SweetAlertDialog(getActivity(), SweetAlertDialog.SUCCESS_TYPE)
+                                    .setTitleText(getResources().getString(R.string.completed_reaction))
+                                    .setContentText(getResources().getString(R.string.completed_content))
+                                    .setCancelText(getResources().getString(R.string.cancel_button))
+                                    .setConfirmText(getResources().getString(R.string.confirm_button))
+                                    .showCancelButton(true)
+                                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                        @Override
+                                        public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                            ((MainActivity)getActivity()).refreshGame();
+                                            sweetAlertDialog.cancel();
+                                        }
+                                    })
+                                    .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                                        @Override
+                                        public void onClick(SweetAlertDialog sDialog) {
+                                            sDialog.cancel();
+                                        }
+                                    })
+                                    .show();
+                        }
                     }
                 }
             }

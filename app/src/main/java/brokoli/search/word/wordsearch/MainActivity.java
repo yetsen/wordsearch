@@ -201,11 +201,16 @@ public class MainActivity extends Activity {
             case R.id.settingButton:
                 return true;
             case R.id.refreshButton:
-                selectWords();
-                isNewGame = true;
-                initializeFragment();
+                refreshGame();
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void refreshGame() {
+        selectWords();
+        isNewGame = true;
+        initializeFragment();
+    }
+
 }
